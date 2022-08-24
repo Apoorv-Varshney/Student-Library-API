@@ -27,26 +27,31 @@ public class IssueController {
 	@PostMapping("/issueBook")
 	public ResponseEntity<?> issueBook(@RequestBody Booking booking) {
 
-		//get Books by book Id
+		// get Books by book Id
 		List<Book> bookList = bookService.getBooksById(booking.getBookId());
-		
-		//get Student by student ID
+
+		// get Student by student ID
 		Student student = studentService.findStudentById(booking.getStudentId());
 
-		//checking student
+		// checking student
 		if (!(student == null)) {
-			
-			bookService.processBooks(bookList, student);
 
-			//saving student in DB
-			studentService.saveStudent(student);
+			if (!(bookList.isEmpty())) {
 
-			//on success
-			return ResponseEntity.ok().body(student);
+				bookService.processBooks(bookList, student);
+
+				// saving student in DB
+				studentService.saveStudent(student);
+
+				// on success
+				return ResponseEntity.ok().body(student);
+			} else {
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid Book");
+			}
 		} else {
-			
-			//on error
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid Data");
+
+			// on error
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid Student");
 		}
 
 	}

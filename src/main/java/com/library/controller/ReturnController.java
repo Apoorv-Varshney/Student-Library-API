@@ -1,10 +1,6 @@
 package com.library.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,38 +34,41 @@ public class ReturnController {
 		// get Books by book Id
 		List<Book> bookList = bookService.getBooksById(booking.getBookId());
 
+		System.out.println(bookList);
 		// get Student by student ID
 		Student student = studentService.findStudentById(booking.getStudentId());
 
+		// getting list of Books
+		List<Book> list = bookService.getAll();
+
 		// checking student
-		if (!(student == null)) {
+		if (student!=null) {
 
-			// getting student owned books
-			List<Book> studentBooks = student.getBooks();
+			if (!(bookList.isEmpty())) {
+				// getting student owned books
+				List<Book> studentBooks = student.getBooks();
 
-			// removing books from student
-			bookService.deleteBooks(bookList);
+				// removing books from student
+				bookService.deleteBooks(bookList);
 
-			// getting book left with student
-			List<Book> remainingBooks = bookService.remainingBooks(studentBooks, bookList);
-			student.setBooks(remainingBooks);
+				// getting book left with student
+				List<Book> remainingBooks = bookService.remainingBooks(studentBooks, bookList);
+				student.setBooks(remainingBooks);
 
-			// saving the student
-			studentService.saveStudent(student);
-
-			// on success
-			return ResponseEntity.ok().body(student);
-		} else {
-			
-			if(student==null && bookList==null) {
-				// on no student found
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid data");
+				// saving the student
+				studentService.saveStudent(student);
+				// on success
+				return ResponseEntity.ok().body(student);
+			} else {
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid Book");
 			}
-			
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid Data");
-			
+
+		} else {
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid Student");
+
 		}
-		
+
 	}
 
 }
